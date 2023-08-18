@@ -63,16 +63,31 @@ class RoomDetail extends StatelessWidget {
                 "${url1!.split("API/").first.toString()}image/$img"),
           ),
           SizedBox(height: 10),
-          ElevatedButton(
-              onPressed: () {
-                bookRoom();
-                checkRoomBookStatus();
-              },
-              child: Text("Book Now",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-              style: ButtonStyle(
-                  shape: MaterialStateProperty.all(StadiumBorder()),
-                  backgroundColor: MaterialStateProperty.all(Colors.purple)))
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                  onPressed: () {
+                    bookRoom();
+                    checkRoomBookStatus();
+                  },
+                  child: Text("Book Now",
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                  style: ButtonStyle(
+                      shape: MaterialStateProperty.all(StadiumBorder()),
+                      backgroundColor: MaterialStateProperty.all(Colors.purple))),
+              SizedBox(width: 10),
+              ElevatedButton(
+                  onPressed: () {
+                    checkRoomBookStatus();
+                  },
+                  child: Text("Payment",
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                  style: ButtonStyle(
+                      shape: MaterialStateProperty.all(StadiumBorder()),
+                      backgroundColor: MaterialStateProperty.all(Colors.purple)))
+            ],
+          ),
         ]));
   }
 }

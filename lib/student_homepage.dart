@@ -5,8 +5,8 @@ import 'package:hostel_mgmt_sm/room_details.dart';
 import 'package:http/http.dart';
 
 class StudentHome extends StatefulWidget {
-  StudentHome({Key? key,required this.stuId}) : super(key: key);
-String stuId;
+  StudentHome({Key? key, required this.stuId}) : super(key: key);
+  String stuId;
 
   @override
   State<StudentHome> createState() => _StudentHomeState();
@@ -14,15 +14,28 @@ String stuId;
 
 class _StudentHomeState extends State<StudentHome> {
   List roomDetails = [];
+  List<dynamic> mealsMenu=[];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     fetchRoomDetails();
+    fetchMealsMenu();
   }
 
   String url1 = "http://192.168.1.40/regal/";
+
+  Future<void> fetchMealsMenu() async {
+    String url = "http://192.168.1.40/regal/API/fetchmealsmenu.php";
+    Response res = await get(Uri.parse(url));
+    if (res.statusCode == 200) {
+      setState(() {
+        mealsMenu = json.decode(res.body);
+      });
+    }
+    print(mealsMenu);
+  }
 
   Future<void> fetchRoomDetails() async {
     String url = "http://192.168.1.40/regal/roomdetails.php";
@@ -72,12 +85,11 @@ class _StudentHomeState extends State<StudentHome> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) => RoomDetail(
-                                      roomNo: roomNo,
-                                      roomType: roomType,
-                                      amount: amount,
-                                      img: img,
-                                      stuId:widget.stuId
-                                    )));
+                                    roomNo: roomNo,
+                                    roomType: roomType,
+                                    amount: amount,
+                                    img: img,
+                                    stuId: widget.stuId)));
                       },
                       title: Column(
                         children: [
@@ -99,8 +111,21 @@ class _StudentHomeState extends State<StudentHome> {
                       )),
                 );
               }),
-        ],
+          DataTable(
+              columns: [
+                DataColumn(label: Text("Day")),
+                DataColumn(label: Text("Breakfast")),
+                DataColumn(label: Text("Lunch")),
+                DataColumn(label: Text("Dinner"))
+              ],
+              rows: mealsMenu.map((data) => DataRow(cells: [
+                    DataCell(Text(data['day'])),
+                DataCell(Text(data['breakfast'])),
+                DataCell(Text(data['lunch'])),
+                DataCell(Text(data['dinner'])),
+                  ])).toList(),
       ),
+    ]),
     );
   }
 }
