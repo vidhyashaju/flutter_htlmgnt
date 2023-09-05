@@ -48,7 +48,7 @@ class _StudentRegisterState extends State<StudentRegister> {
 
   Future<List?> studentRegister(String username, pwd, email, course,
       gender, dob, File image) async {
-    String url = "http://192.168.1.39/regal/API/student.php";
+    String url = "http://192.168.1.64/regal/API/student.php";
     var request = MultipartRequest('POST', Uri.parse(url));
     request.fields['stu_name'] = username;
     request.fields['pwd'] = pwd;

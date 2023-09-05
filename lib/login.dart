@@ -21,6 +21,7 @@ class _LoginState extends State<Login> {
     pwd.dispose();
   }
 
+
   TextEditingController userName=TextEditingController();
 
   TextEditingController pwd=TextEditingController();
@@ -28,21 +29,21 @@ class _LoginState extends State<Login> {
   String userType='';
 
   Future<void> login() async {
-    String url = "http://192.168.1.40/regal/API/login.php";
+    String url = "http://192.168.1.64/regal/API/login.php";
     var response = await post(
         Uri.parse(url), body: {"username": userName.text, "pwd": pwd.text});
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final String? userType = data['type'];
       final String status=data['message'];
+      final String? username=data['username'];
       final String? stuId=data['stu_id'];
       print(status);
       print(userType);
+      print(username);
       print(data);
-      print(stuId);
       if (status == 'success') {
-          handleUserType(userType!,stuId!);
-       // });
+          handleUserType(userType!,username!,stuId!);
       }
       else if (status == 'failed'){
          handlePendingUser(status);
@@ -61,14 +62,14 @@ class _LoginState extends State<Login> {
       ],);
     });
   }
-  void handleUserType( String userType, String stuId){
+  void handleUserType( String userType,String username,String stuId ){
     if(userType=='student')
       {
-        Navigator.push(context, MaterialPageRoute(builder: (context)=>StudentHome(stuId: stuId,)));
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>StudentHome(username: username,stuId:stuId )));
       }
     else if(userType=='parent')
       {
-        Navigator.push(context, MaterialPageRoute(builder: (context)=>ParentHome()));
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>ParentHome(username: username,stuId:stuId ,)));
       }
   }
   @override

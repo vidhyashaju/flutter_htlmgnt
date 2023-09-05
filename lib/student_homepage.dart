@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hostel_mgmt_sm/room_details.dart';
+import 'package:hostel_mgmt_sm/send_complaint.dart';
+import 'package:hostel_mgmt_sm/send_feedback.dart';
+import 'package:hostel_mgmt_sm/view_notification.dart';
 import 'package:http/http.dart';
 
 class StudentHome extends StatefulWidget {
-  StudentHome({Key? key, required this.stuId}) : super(key: key);
-  String stuId;
+  StudentHome({Key? key, this.username, this.stuId}) : super(key: key);
+  String? username, stuId;
 
   @override
   State<StudentHome> createState() => _StudentHomeState();
@@ -14,7 +17,7 @@ class StudentHome extends StatefulWidget {
 
 class _StudentHomeState extends State<StudentHome> {
   List roomDetails = [];
-  List<dynamic> mealsMenu=[];
+  List mealsMenu = [];
 
   @override
   void initState() {
@@ -24,10 +27,10 @@ class _StudentHomeState extends State<StudentHome> {
     fetchMealsMenu();
   }
 
-  String url1 = "http://192.168.1.40/regal/";
+  String url1 = "http://192.168.1.64/regal/";
 
   Future<void> fetchMealsMenu() async {
-    String url = "http://192.168.1.40/regal/API/fetchmealsmenu.php";
+    String url = "http://192.168.1.64/regal/API/fetchmealsmenu.php";
     Response res = await get(Uri.parse(url));
     if (res.statusCode == 200) {
       setState(() {
@@ -38,7 +41,7 @@ class _StudentHomeState extends State<StudentHome> {
   }
 
   Future<void> fetchRoomDetails() async {
-    String url = "http://192.168.1.40/regal/roomdetails.php";
+    String url = "http://192.168.1.64/regal/roomdetails.php";
     Response res = await get(Uri.parse(url));
     if (res.statusCode == 200) {
       setState(() {
@@ -52,80 +55,150 @@ class _StudentHomeState extends State<StudentHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: ListView(
-        shrinkWrap: true,
-        children: [
-          Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
+      appBar: AppBar(title: Text("Welcome ${widget.username}"), actions: [
+        IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: Icon(Icons.logout))
+      ]),
+      body: ListView(shrinkWrap: true, children: [
+        Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.purpleAccent,
+            ),
+            width: 300,
+            height: 50,
+            child: Center(
+                child: Text(
+              "AVILABLE ROOMS",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ))),
+        ListView.builder(
+            shrinkWrap: true,
+            itemCount: roomDetails.length,
+            itemBuilder: (context, index) {
+              var roomNo = roomDetails[index]['roomno'];
+              var roomType = roomDetails[index]['roomtype'];
+              var amount = roomDetails[index]['fee'];
+              var img = roomDetails[index]['photo'];
+              return Card(
+                shape: StadiumBorder(),
                 color: Colors.purpleAccent,
-              ),
-              width: 300,
-              height: 50,
-              child: Center(
-                  child: Text(
-                "AVILABLE ROOMS",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ))),
-          ListView.builder(
-              shrinkWrap: true,
-              itemCount: roomDetails.length,
-              itemBuilder: (context, index) {
-                var roomNo = roomDetails[index]['roomno'];
-                var roomType = roomDetails[index]['roomtype'];
-                var amount = roomDetails[index]['fee'];
-                var img = roomDetails[index]['photo'];
-                return Card(
-                  shape: StadiumBorder(),
-                  color: Colors.purpleAccent,
-                  child: ListTile(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => RoomDetail(
+                child: ListTile(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => RoomDetail(
                                     roomNo: roomNo,
                                     roomType: roomType,
                                     amount: amount,
                                     img: img,
-                                    stuId: widget.stuId)));
-                      },
-                      title: Column(
-                        children: [
-                          Text("Room No :${roomNo}"),
-                          Text("Room Type : ${roomType}"),
-                          Text("Amount Per Month :${amount}")
-                        ],
+                                    username: widget.username,
+                                    stuId: widget.stuId,
+                                    // stuId: widget.stuId
+                                  )));
+                    },
+                    title: Column(
+                      children: [
+                        Text("Room No :${roomNo}"),
+                        Text("Room Type : ${roomType}"),
+                        Text("Amount Per Month :${amount}")
+                      ],
+                    ),
+                    leading: Container(
+                      width: 100,
+                      height: 100,
+                      child: Image(
+                        image: NetworkImage(
+                            "${url1!.split("API/").first.toString()}image/${img}"),
+                        height: 50,
+                        width: 50,
+                        fit: BoxFit.fill,
                       ),
-                      leading: Container(
-                        width: 100,
-                        height: 100,
-                        child: Image(
-                          image: NetworkImage(
-                              "${url1!.split("API/").first.toString()}image/${img}"),
-                          height: 50,
-                          width: 50,
-                          fit: BoxFit.fill,
-                        ),
-                      )),
-                );
-              }),
-          DataTable(
-              columns: [
-                DataColumn(label: Text("Day")),
-                DataColumn(label: Text("Breakfast")),
-                DataColumn(label: Text("Lunch")),
-                DataColumn(label: Text("Dinner"))
-              ],
-              rows: mealsMenu.map((data) => DataRow(cells: [
-                    DataCell(Text(data['day'])),
-                DataCell(Text(data['breakfast'])),
-                DataCell(Text(data['lunch'])),
-                DataCell(Text(data['dinner'])),
-                  ])).toList(),
-      ),
-    ]),
+                    )),
+              );
+            }),
+        SizedBox(height: 25),
+        Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.purpleAccent,
+            ),
+            width: 300,
+            height: 50,
+            child: Center(
+                child: Text(
+              "FOOD MENU",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ))),
+        SizedBox(height: 25),
+        Table(
+            border: TableBorder.all(
+                color: Colors.purpleAccent, style: BorderStyle.solid, width: 2),
+            children: [
+              TableRow(
+                children: [
+                  TableCell(child: Text("Day")),
+                  TableCell(child: Text("Breakfast")),
+                  TableCell(child: Text("Lunch")),
+                  TableCell(child: Text("Dinner")),
+                ],
+              ),
+              for (var menu in mealsMenu)
+                TableRow(children: [
+                  TableCell(child: Text(menu['day'])),
+                  TableCell(child: Text(menu['breakfast'])),
+                  TableCell(child: Text(menu['lunch'])),
+                  TableCell(child: Text(menu['dinner'])),
+                ]),
+            ]),
+        SizedBox(height: 25),
+        Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+          ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            ViewNotification(stuId: widget.stuId)));
+              },
+              child: Text("View Notification"),
+              style: ButtonStyle(
+                  shape: MaterialStateProperty.all(StadiumBorder()),
+                  backgroundColor:
+                      MaterialStateProperty.all(Colors.purpleAccent))),
+          ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SendFeedback(
+                              stuId: widget.stuId,
+                            )));
+              },
+              child: Text("Send Feedback"),
+              style: ButtonStyle(
+                  shape: MaterialStateProperty.all(StadiumBorder()),
+                  backgroundColor:
+                      MaterialStateProperty.all(Colors.purpleAccent))),
+        ]),
+        ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          SendComplaint(stuId: widget.stuId)));
+            },
+            child: Text("Send Complaints"),
+            style: ButtonStyle(
+                shape: MaterialStateProperty.all(StadiumBorder()),
+                backgroundColor:
+                    MaterialStateProperty.all(Colors.purpleAccent))),
+      ]),
     );
   }
 }

@@ -40,7 +40,7 @@ class _ParentRegisterState extends State<ParentRegister> {
 
   Future<List?> parentRegister(String username, pwd, address, phone) async {
     if(selectedName!=null) {
-      String url = "http://192.168.1.40/regal/API/parent.php";
+      String url = "http://192.168.1.64/regal/API/parent.php";
       Response res = await post(Uri.parse(url), body: {
         "stu_name":selectedName,
         "name": username,
@@ -60,7 +60,7 @@ class _ParentRegisterState extends State<ParentRegister> {
     }
    }
   getName() async {
-    String url = "http://192.168.1.40/regal/API/stuid.php";
+    String url = "http://192.168.1.64/regal/API/stuid.php";
     var response = await get(Uri.parse(url));
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
